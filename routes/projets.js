@@ -1,6 +1,6 @@
-const userRoutes = (app, fs) => {
+const projRoutes = (app, fs) => {
     // variables
-    const dataPath = './data/users.json';
+    const dataPath = './data/reglages.json';
 
     const readFile = (
         callback,
@@ -34,14 +34,29 @@ const userRoutes = (app, fs) => {
 
     // READ
     // Notice how we can make this 'read' operation much more simple now.
-    app.get('/users', (req, res) => {
+    app.get('/projets', (req, res) => {
         readFile(data => {
             res.send(data);
         }, true);
     });
 
+    // UPDATE
+    app.put('/projets/:id', (req, res) => {
+        readFile(data => {
+            // add the new user
+            const projId = req.params['id'];
+            data[projId] = req.body;
+            //console.log(projId);
+            //console.log(req.body);
+
+            writeFile(JSON.stringify(data, null, 2), () => {
+                res.status(200).send(`projets id:${projId} updated`);
+            });
+        }, true);
+    });
+
     // CREATE
-    app.post('/users', (req, res) => {
+    /*app.post('/projets', (req, res) => {
         readFile(data => {
             // Note: this needs to be more robust for production use. 
             // e.g. use a UUID or some kind of GUID for a unique ID value.
@@ -54,10 +69,10 @@ const userRoutes = (app, fs) => {
                 res.status(200).send('new user added');
             });
         }, true);
-    });
+    });*/
 
 
 
 };
 
-module.exports = userRoutes;
+module.exports = projRoutes;

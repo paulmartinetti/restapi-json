@@ -1,0 +1,39 @@
+body {
+    background-color: white;
+    color: black;
+    width: 40pc;
+    padding: 5px;
+}
+.wrapper {
+    display: block;
+    border: 2px solid #999;
+    padding: 5px;
+}
+.mytop {
+    align-items: center;
+    padding: 25px;
+}
+.sliderBox{
+    width: 80%;
+    align-items: center;
+    display: inline-block;
+    padding: 10px;
+}
+.oneSlider{
+    padding: 25px;
+}
+.posNegBtns{
+    display: inline;
+    padding: 2px;
+}
+.sbar {
+    width: 100%;
+}
+.slide {
+    border: 2px solid #999;
+    padding: 10px;
+}
+.fnBoutons {
+    align-items: center;
+    padding: 25px;
+}
