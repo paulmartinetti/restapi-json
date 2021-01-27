@@ -146,7 +146,7 @@ function getSlider(id, newVal) {
     // param touché
     if (id == nom) {
       // nouvelle valeur du slider, ça vient du gui
-      data[indAct][nom] = newVal;
+      data[indAct][nom] = Number(newVal);
       break;
     }
   }
@@ -204,7 +204,7 @@ https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
 // save
 function saveJson() {
   const xhr = new XMLHttpRequest();
-  urlPut = 'http://localhost:3001/projets/id=' + data[indAct]["id"];
+  urlPut = 'http://localhost:3001/projets/' + data[indAct]["id"];
   xhr.open('PUT', urlPut, true);
   xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
   let pkg = JSON.stringify(data[indAct]);

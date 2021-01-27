@@ -43,14 +43,15 @@ const projRoutes = (app, fs) => {
     // UPDATE
     app.put('/projets/:id', (req, res) => {
         readFile(data => {
-            // add the new user
+            // 
+            //JSON.parse(req.body.data);
             const projId = req.params['id'];
             data[projId] = req.body;
             //console.log(projId);
             //console.log(req.body);
 
             writeFile(JSON.stringify(data, null, 2), () => {
-                res.status(200).send(`projets id:${projId} updated`);
+                res.status(200).send(`projets ${projId} updated`);
             });
         }, true);
     });
