@@ -210,13 +210,13 @@ function saveReglages() {
   xhr.onload = function () {
     if (xhr.status === 200) {
 
-      data = JSON.parse(xhr.responseText);
-      console.log(data);
+      //data = JSON.parse(xhr.responseText);
+      //console.log(data);
       // c'est bon
       // rechercher le json de nouveau à chaque appuis du selector
-      //url = 'http://localhost:3001/projets';
-      //request.open('GET', url, true);
-      //request.send();
+      url = 'http://localhost:3001/projets';
+      request.open('GET', url, true);
+      request.send();
       
       
 

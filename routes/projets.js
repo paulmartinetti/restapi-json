@@ -23,11 +23,12 @@ const projRoutes = (app, fs) => {
         filePath = dataPath,
         encoding = 'utf8'
     ) => {
-        fs.writeFile(filePath, fileData, encoding, (err, data) => {
+        fs.writeFile(filePath, fileData, encoding, err => {
             if (err) {
                 throw err;
             }
-            callback(data);
+
+            callback();
         });
     };
 
@@ -42,12 +43,12 @@ const projRoutes = (app, fs) => {
     // UPDATE
     app.put('/projets/:id', (req, res) => {
         readFile(data => {
-            // 
+            // add the new user
             const projId = req.params['id'];
             data[projId] = req.body;
 
             writeFile(JSON.stringify(data, null, 2), () => {
-                res.send(data);
+                res.status(200).send(`projets id:${projId} updated`);
             });
         }, true);
     });
@@ -58,10 +59,8 @@ const projRoutes = (app, fs) => {
             // Note: this needs to be more robust for production use. 
             // e.g. use a UUID or some kind of GUID for a unique ID value.
             const newUserId = Date.now().toString();
-
             // add the new user
             data[newUserId] = req.body;
-
             writeFile(JSON.stringify(data, null, 2), () => {
                 res.status(200).send('new user added');
             });
