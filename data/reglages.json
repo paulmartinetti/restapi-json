@@ -2,15 +2,15 @@
   "projet1": {
     "id": 1,
     "nom": "D1_Eco 50",
-    "delayStart": 1000,
+    "delayStart": 100,
     "rampePWM": 40,
     "speedWelding": 7.5,
     "balayage": 0.8,
-    "speedWire": 18,
+    "speedWire": 3,
     "pulseWire": 5,
     "retractWire": 7,
-    "huitieme": 10,
-    "neuvieme": 0
+    "huitieme": 5,
+    "neuvieme": 1
   },
   "projet2": {
     "id": 2,
@@ -22,8 +22,8 @@
     "speedWire": 6,
     "pulseWire": 3,
     "retractWire": 9,
-    "huitieme": 2,
-    "neuvieme": 0
+    "huitieme": 9,
+    "neuvieme": 7
   },
   "projet3": {
     "id": 3,
@@ -31,11 +31,11 @@
     "delayStart": 800,
     "rampePWM": 20,
     "speedWelding": 1,
-    "balayage": 0.8,
-    "speedWire": 16,
+    "balayage": 0.4,
+    "speedWire": 3,
     "pulseWire": 2,
-    "retractWire": 4,
-    "huitieme": 10,
-    "neuvieme": 5
+    "retractWire": 1,
+    "huitieme": 4,
+    "neuvieme": 1
   }
 }

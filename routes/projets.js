@@ -23,12 +23,11 @@ const projRoutes = (app, fs) => {
         filePath = dataPath,
         encoding = 'utf8'
     ) => {
-        fs.writeFile(filePath, fileData, encoding, err => {
+        fs.writeFile(filePath, fileData, encoding, (err, data) => {
             if (err) {
                 throw err;
             }
-
-            callback();
+            callback(data);
         });
     };
 
@@ -44,14 +43,11 @@ const projRoutes = (app, fs) => {
     app.put('/projets/:id', (req, res) => {
         readFile(data => {
             // 
-            //JSON.parse(req.body.data);
             const projId = req.params['id'];
             data[projId] = req.body;
-            //console.log(projId);
-            //console.log(req.body);
 
             writeFile(JSON.stringify(data, null, 2), () => {
-                res.status(200).send(`projets ${projId} updated`);
+                res.send(data);
             });
         }, true);
     });
