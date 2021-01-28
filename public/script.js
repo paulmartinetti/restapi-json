@@ -4,20 +4,22 @@
  */
 // json entier (données = data)
 let data;
-let dataLen = 3;
 // au début on fabrique selector, ce vars rassure qu'il n'ai fabriqué qu'une fois et après, first = false
 let first = true;
 
-// les noms des params de chaque json
-// dataNomA[0] = "delayStart"
-let dataNomA = ["delayStart", "rampePWM", "speedWelding", "balayage", "speedWire", "pulseWire", "retractWire", "huitieme", "neuvieme"];
-// len = 9, du 0 au 8 chaque boucle de var "i"
-let len = dataNomA.length;
+// indice actuel, 0 corréspond à D1_Eco 50, 1 corréspond à D2_Janisol
+let projAct;
+let projLen = 0;
+let projNom = "projet";
 
+// les noms des params de chaque json
+// paramA[0] = "delayStart"
+let paramA = [];
+// len = 9, du 0 au 8 chaque boucle de var "i"
+let len;
 // du gui, on va remplir ça une fois avec step, min, max
 let sliderA = [];
-// indice actuel, 0 corréspond à D1_Eco 50, 1 corréspond à D2_Janisol
-let indAct = 0;
+let url;
 
 /**
  * ALWAYS update gui from data
@@ -29,18 +31,19 @@ function guiUpdate() {
   // m-à-j gui des données
   for (let i = 0; i < len; i++) {
     // nom, comme "balayage"
-    let nom = dataNomA[i];
+    let param = paramA[i];
     // sa valeur il faut forcer Number() sinon il est traité comme texte (String)
-    let val = Number(data[indAct][nom]);
+    let val = Number(data[projAct][param]);
 
     // il faut chercher de nouveau chaque slider
-    let s = document.getElementById(nom);
+    let s = document.getElementById(param);
     // et sa valeur montrée
-    let sv = document.getElementById(nom + "Val");
+    let sv = document.getElementById(param + "Val");
 
     // les boutons plus et moins, puisque on change leurs états en fonction de min max
-    let bp = document.getElementById(nom + "Plus");
-    let bm = document.getElementById(nom + "Moins");
+    let bp = document.getElementById(param + "Plus");
+    let bm = document.getElementById(param + "Moins");
+
 
     // update gui
     sv.innerHTML = s.value = val;
@@ -51,62 +54,44 @@ function guiUpdate() {
   }
 }
 
+
 /**
  * populate select option w json
  * https://www.codebyamir.com/blog/populate-a-select-dropdown-list-with-json
  */
-
-// il n'y a qu'un seul selector
-let dropdown = document.getElementById('designation-dropdown');
-// initialiser
-dropdown.length = 0;
-dropdown.selectedIndex = 0;
-
-const url = 'http://localhost:3001/projets';
-
-// 
-const request = new XMLHttpRequest();
-request.open('GET', url, true);
-
-request.onload = function () {
-  if (request.status === 200) {
-    // c'est bon
-    data = JSON.parse(request.responseText);
-    // remplir selector
-    setupPulldown();
-  } else {
-    // Reached the server, but it returned an error
-  }
-  // initial
-  guiUpdate();
-}
-request.onerror = function () {
-  console.error('An error occurred fetching the JSON from ' + url);
-};
-
-// c'est parti -- premier appel à une fonction
-request.send();
-
-/**
- * selector onChange()
- * https://www.w3schools.com/jsref/event_onchange.asp
- * 
- * Pulldown = selector
- */
-function setupPulldown() {
+function setupGui() {
   // fabrique une fois seulement
   if (!first) return;
+
   let option;
-  for (let i = 0; i < 3; i++) {
+  projLen = 0;
+  // il n'y a qu'un seul selector
+  let dropdown = document.getElementById('designation-dropdown');
+  // initialiser
+  removeAllChildNodes(dropdown);
+  dropdown.length = 0;
+  dropdown.selectedIndex = 0;
+  // remplir selector
+  for (const i in data) {
     option = document.createElement('option');
-    option.text = data[i].name;
-    option.value = data[i].id;
+    option.text = data[i].nom;
+    option.value = projNom + data[i].id;
     dropdown.add(option);
+    projLen++;
   }
+
+  // fill param key array, il y aura tjs un projet
+  projAct = "projet1";
+  // capter les noms de parametres dans un tableau
+  paramA = Object.keys(data[projAct]);
+  // supprimer "id" et "name"
+  paramA.splice(0, 2);
+  // capter pour boucler maj gui
+  len = paramA.length;
 
   // remplir global var pour gérer le gui
   for (let i = 0; i < len; i++) {
-    let s = document.getElementById(dataNomA[i]);
+    let s = document.getElementById(paramA[i]);
     let obj = {
       step: s.step,
       min: s.min,
@@ -119,21 +104,28 @@ function setupPulldown() {
   // une fois seulement (on appel le json à chaque appuis sur selector)
   first = false;
 }
-// 
+
+/**
+ * selector onChange()
+ * https://www.w3schools.com/jsref/event_onchange.asp
+ * 
+ * Pulldown = selector
+ */
 function selectOnChange(curSelVal) {
-  // capter l'indAct = l'indice actuel du json (un groupe de valeurs)
-  for (let i = 0; i < dataLen; i++) {
-    if (data[i].id == curSelVal) {
+  // capter l'projAct = l'indice actuel du json (un groupe de valeurs)
+  for (const i in data) {
+    let t = projNom + data[i].id;
+    if (t == curSelVal) {
       // trouvé !
-      indAct = i;
+      projAct = t;
       break;
     }
   }
   // rechercher le json de nouveau à chaque appuis du selector
+  url = 'http://localhost:3001/projets';
   request.open('GET', url, true);
   request.send();
 }
-
 
 /**
 * slider onChange() -- si tu appuis sur un slider, on m-à-j les données
@@ -142,11 +134,11 @@ function selectOnChange(curSelVal) {
 function getSlider(id, newVal) {
   for (let i = 0; i < len; i++) {
     // recherche dans tous les params (balayage, speed, etc)
-    let nom = dataNomA[i];
+    let param = paramA[i];
     // param touché
-    if (id == nom) {
+    if (id == param) {
       // nouvelle valeur du slider, ça vient du gui
-      data[indAct][nom] = Number(newVal);
+      data[projAct][param] = Number(newVal);
       break;
     }
   }
@@ -162,14 +154,14 @@ function getSlider(id, newVal) {
 function onPlus(monId) {
   for (let i = 0; i < len; i++) {
     // scan params
-    let nom = dataNomA[i];
+    let param = paramA[i];
     // identifier le bouton touché
-    if (monId.includes(nom)) {
-      let n = Number(data[indAct][nom]);
+    if (monId.includes(param)) {
+      let n = Number(data[projAct][param]);
       // ajoute step à la valeur actuelle
       n += Number(sliderA[i].step);
       // m-à-j les données
-      data[indAct][nom] = n.toFixed(2);
+      data[projAct][param] = n.toFixed(2);
       break;
     }
   }
@@ -179,12 +171,12 @@ function onPlus(monId) {
 function onMoins(monId) {
   for (let i = 0; i < len; i++) {
     // scan params
-    let nom = dataNomA[i];
+    let param = paramA[i];
     // update param of touched slider
-    if (monId.includes(nom)) {
-      let n = Number(data[indAct][nom]);
+    if (monId.includes(param)) {
+      let n = Number(data[projAct][param]);
       n -= Number(sliderA[i].step);
-      data[indAct][nom] = n.toFixed(2);
+      data[projAct][param] = n.toFixed(2);
       break;
     }
   }
@@ -192,6 +184,13 @@ function onMoins(monId) {
   guiUpdate();
 }
 
+
+// en ajoutant et supprimant un projet
+function removeAllChildNodes(parent) {
+  while (parent.firstChild) {
+    parent.removeChild(parent.firstChild);
+  }
+}
 /**
 * save json to file on server
 * https://robkendal.co.uk/blog/how-to-build-a-restful-node-js-api-server-using-json-files
@@ -202,19 +201,20 @@ https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
 // handler
 
 // save
-function saveJson() {
+function saveReglages() {
   const xhr = new XMLHttpRequest();
-  urlPut = 'http://localhost:3001/projets/' + data[indAct]["id"];
-  xhr.open('PUT', urlPut, true);
-  xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
-  let pkg = JSON.stringify(data[indAct]);
+  url = 'http://localhost:3001/projets/' + projNom + data[projAct]["id"];
+  xhr.open('PUT', url, true);
+  xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+  let pkg = JSON.stringify(data[projAct]);
   xhr.onload = function () {
     if (xhr.status === 200) {
       // c'est bon
-      console.log(xhr.responseText);
       // rechercher le json de nouveau à chaque appuis du selector
+      url = 'http://localhost:3001/projets';
       request.open('GET', url, true);
       request.send();
+      
       //data = JSON.parse(xhr.responseText);
     } else {
       // Reached the server, but it returned an error
@@ -227,3 +227,26 @@ function saveJson() {
   };
   xhr.send(pkg);
 }
+
+const request = new XMLHttpRequest();
+url = 'http://localhost:3001/projets';
+request.open('GET', url, true);
+
+request.onload = function () {
+  if (request.status === 200) {
+    // c'est bon
+    data = JSON.parse(request.responseText);
+    // remplir selector
+    setupGui();
+  } else {
+    // Reached the server, but it returned an error
+  }
+  // initial
+  guiUpdate();
+}
+request.onerror = function () {
+  console.error('An error occurred fetching the JSON from ' + url);
+};
+
+// c'est parti -- premier appel à une fonction
+request.send();
