@@ -46,7 +46,7 @@ const projRoutes = (app, fs) => {
             // add the new user
             const projId = req.params['id'];
             data[projId] = req.body;
-
+            // null=tout le json, 2=de l'espace dans le json pour nous lire
             writeFile(JSON.stringify(data, null, 2), () => {
                 res.status(200).send(`projets id:${projId} updated`);
             });

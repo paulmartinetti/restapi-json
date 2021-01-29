@@ -21,6 +21,9 @@ let len;
 let sliderA = [];
 let url;
 
+// états des boutons
+let saveDes = false;
+
 /**
  * ALWAYS update gui from data
  * 
@@ -51,6 +54,10 @@ function guiUpdate() {
     // l'expression après = on simule le prochain appuis sur + ou - , et s'il sera trop grand ou petit, on désactive le bouton
     bp.disabled = val + Number(sliderA[i].step) > Number(sliderA[i].max);
     bm.disabled = val - Number(sliderA[i].step) < Number(sliderA[i].min);
+
+    // boutons
+    let sav = document.getElementById("saveRegs");
+    sav.disabled = saveDes;
   }
 }
 
@@ -202,6 +209,11 @@ https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
 
 // save
 function saveReglages() {
+  // désactiver bouton
+  let sav = document.getElementById("saveRegs");
+  sav.disabled = true;
+  saveDes = true;
+
   const xhr = new XMLHttpRequest();
   url = 'http://localhost:3001/projets/' + projNom + data[projAct]["id"];
   xhr.open('PUT', url, true);
@@ -217,8 +229,10 @@ function saveReglages() {
       url = 'http://localhost:3001/projets';
       request.open('GET', url, true);
       request.send();
-      
-      
+
+      // activer Save
+      saveDes = false;
+
 
     } else {
       // Reached the server, but it returned an error
