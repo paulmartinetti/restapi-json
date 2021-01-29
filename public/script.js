@@ -61,6 +61,7 @@ function guiUpdate() {
     sav.disabled = saveDes;
 
     let sup = document.getElementById("suppProj");
+    sup.innerHTML = "Supprimer ce projet";
     sup.disabled = supProj;
   }
 }
@@ -84,17 +85,15 @@ function setupGui() {
   dropdown.selectedIndex = 0;
   // remplir selector
   for (const i in data) {
-    if ((data[i].id) != 0) {
-      option = document.createElement('option');
-      option.text = data[i].nom;
-      option.value = projNom + data[i].id;
-      dropdown.add(option);
-      projLen++;
-    }
+    option = document.createElement('option');
+    option.text = data[i].nom;
+    option.value = projNom + data[i].id;
+    dropdown.add(option);
+    projLen++;
   }
 
   // fill param key array, il y aura tjs un projet
-  projAct = "projet0";
+  projAct = projMin();
   // capter les noms de parametres dans un tableau
   paramA = Object.keys(data[projAct]);
   // supprimer "id" et "name"
@@ -115,7 +114,6 @@ function setupGui() {
   }
 
   // une fois seulement (on appel le json à chaque appuis sur selector)
-  projAct = "projet1";
   first = false;
 }
 
@@ -213,7 +211,7 @@ function supprimeProjet() {
   let b = document.getElementById("suppProj");
   // confirmer
   if (!supProj) {
-    b.innerHTML = "Suppimer ?";
+    b.innerHTML = "Supprimer, oui ?";
     supProj = true;
     return;
   } else {
@@ -230,10 +228,23 @@ function removeAllChildNodes(parent) {
     parent.removeChild(parent.firstChild);
   }
 }
-
+function projMin(){
+  let t;
+  for (const i in data) {
+    t = (t<data[i].id) ? t : data[i].id;
+  }
+  return "projet"+t;
+}
+function projMax(){
+  let t;
+  for (const i in data) {
+    t = (t>data[i].id) ? t : data[i].id;
+  }
+  return "projet"+t;
+}
 var randomProperty = function (obj) {
   var keys = Object.keys(obj);
-  return obj[keys[ keys.length * Math.random() << 0]];
+  return obj[keys[keys.length * Math.random() << 0]];
 };
 /**
  * 
@@ -263,9 +274,9 @@ function majReglages(crud) {
 
       // activer btn
       switch (crud) {
-        case "PUT" :
+        case "PUT":
           saveDes = false;
-        case "DELETE" :
+        case "DELETE":
           supProj = false;
       }
 

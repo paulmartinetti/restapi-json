@@ -1,17 +1,4 @@
 {
-  "projet0": {
-    "id": 0,
-    "nom": "Config",
-    "delayStart": 2000,
-    "rampePWM": 0,
-    "speedWelding": 10,
-    "balayage": 1.5,
-    "speedWire": 20,
-    "pulseWire": 0,
-    "retractWire": 10,
-    "huitieme": 7,
-    "neuvieme": 3
-  },
   "projet1": {
     "id": 1,
     "nom": "D1_Eco 50",
