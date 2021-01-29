@@ -10,6 +10,7 @@
     <div class="wrapper">
         <div class="mytop">
             <select id="designation-dropdown" name="design" onchange="selectOnChange(this.value)"></select>
+            <button class="btnStyle" id="suppProj" onclick="supprimeProjet()">Supprimer ce projet</button>
         </div>
         <div class="sliderBox">
             <!--pour ajouter des sliders-->
@@ -134,8 +135,8 @@
     </div>
 
     <div class="fnBoutons">
-        <button id="saveRegs" onclick="saveReglages()">Save</button>
-        <!-- <button id="expJson" onclick="exportJson()">Exporter Un Json</button> -->
+        <button id="saveRegs" class="btnStyle" onclick="saveReglages()">Save</button>
+        <!-- <button id="expJson" class="btnStyle" onclick="exportJson()">Exporter Un Json</button> -->
     </div>
     </div>
 

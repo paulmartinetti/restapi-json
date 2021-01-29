@@ -23,6 +23,7 @@ let url;
 
 // états des boutons
 let saveDes = false;
+let supProj = false;
 
 /**
  * ALWAYS update gui from data
@@ -58,6 +59,9 @@ function guiUpdate() {
     // boutons
     let sav = document.getElementById("saveRegs");
     sav.disabled = saveDes;
+
+    let sup = document.getElementById("suppProj");
+    sup.disabled = supProj;
   }
 }
 
@@ -80,15 +84,17 @@ function setupGui() {
   dropdown.selectedIndex = 0;
   // remplir selector
   for (const i in data) {
-    option = document.createElement('option');
-    option.text = data[i].nom;
-    option.value = projNom + data[i].id;
-    dropdown.add(option);
-    projLen++;
+    if ((data[i].id) != 0) {
+      option = document.createElement('option');
+      option.text = data[i].nom;
+      option.value = projNom + data[i].id;
+      dropdown.add(option);
+      projLen++;
+    }
   }
 
   // fill param key array, il y aura tjs un projet
-  projAct = "projet1";
+  projAct = "projet0";
   // capter les noms de parametres dans un tableau
   paramA = Object.keys(data[projAct]);
   // supprimer "id" et "name"
@@ -109,6 +115,7 @@ function setupGui() {
   }
 
   // une fois seulement (on appel le json à chaque appuis sur selector)
+  projAct = "projet1";
   first = false;
 }
 
@@ -191,6 +198,31 @@ function onMoins(monId) {
   guiUpdate();
 }
 
+// sauvegarder projet
+function saveReglages() {
+  // désactiver bouton
+  let sav = document.getElementById("saveRegs");
+  sav.disabled = true;
+  saveDes = true;
+  majReglages('PUT');
+}
+
+
+// bouton supprimer projet
+function supprimeProjet() {
+  let b = document.getElementById("suppProj");
+  // confirmer
+  if (!supProj) {
+    b.innerHTML = "Suppimer ?";
+    supProj = true;
+    return;
+  } else {
+    // maj var, pour gui
+    b.disabled = supProj;
+    majReglages('DELETE');
+    first = true;
+  }
+}
 
 // en ajoutant et supprimant un projet
 function removeAllChildNodes(parent) {
@@ -198,41 +230,44 @@ function removeAllChildNodes(parent) {
     parent.removeChild(parent.firstChild);
   }
 }
-/**
-* save json to file on server
-* https://robkendal.co.uk/blog/how-to-build-a-restful-node-js-api-server-using-json-files
 
-https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
+var randomProperty = function (obj) {
+  var keys = Object.keys(obj);
+  return obj[keys[ keys.length * Math.random() << 0]];
+};
+/**
+ * 
+ * m-a-j json dans le server
+* https://robkendal.co.uk/blog/how-to-build-a-restful-node-js-api-server-using-json-files
+* 
+ * 
+ * https://gist.github.com/EtienneR/2f3ab345df502bd3d13e
+ * 
 */
 
-// handler
-
-// save
-function saveReglages() {
-  // désactiver bouton
-  let sav = document.getElementById("saveRegs");
-  sav.disabled = true;
-  saveDes = true;
+function majReglages(crud) {
 
   const xhr = new XMLHttpRequest();
   url = 'http://localhost:3001/projets/' + projNom + data[projAct]["id"];
-  xhr.open('PUT', url, true);
+  xhr.open(crud, url, true);
   xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
   let pkg = JSON.stringify(data[projAct]);
   xhr.onload = function () {
     if (xhr.status === 200) {
-
-      //data = JSON.parse(xhr.responseText);
-      //console.log(data);
       // c'est bon
+
       // rechercher le json de nouveau à chaque appuis du selector
       url = 'http://localhost:3001/projets';
       request.open('GET', url, true);
       request.send();
 
-      // activer Save
-      saveDes = false;
-
+      // activer btn
+      switch (crud) {
+        case "PUT" :
+          saveDes = false;
+        case "DELETE" :
+          supProj = false;
+      }
 
     } else {
       // Reached the server, but it returned an error
@@ -246,6 +281,8 @@ function saveReglages() {
   xhr.send(pkg);
 }
 
+
+// 1. route GET, rechercher les données
 const request = new XMLHttpRequest();
 url = 'http://localhost:3001/projets';
 request.open('GET', url, true);

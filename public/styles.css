@@ -36,4 +36,8 @@ body {
 .fnBoutons {
     align-items: center;
     padding: 25px;
+    justify-items: auto;
+}
+.btnStyle {
+    
 }

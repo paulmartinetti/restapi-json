@@ -66,7 +66,21 @@ const projRoutes = (app, fs) => {
             });
         }, true);
     });*/
+    // DELETE
+    app.delete('/projets/:id', (req, res) => {
 
+        readFile(data => {
+
+            // add the new user
+            const projId = req.params['id'];
+            delete data[projId];
+
+            writeFile(JSON.stringify(data, null, 2), () => {
+                res.status(200).send(`users id:${projId} removed`);
+            });
+        },
+            true);
+    });
 
 
 };
