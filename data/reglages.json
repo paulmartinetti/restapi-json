@@ -37,5 +37,18 @@
     "retractWire": 1,
     "huitieme": 4,
     "neuvieme": 1
+  },
+  "projet4": {
+    "id": 4,
+    "nom": "asdg",
+    "delayStart": 1200,
+    "rampePWM": 60,
+    "speedWelding": 3,
+    "balayage": 1,
+    "speedWire": 6,
+    "pulseWire": 3,
+    "retractWire": 9,
+    "huitieme": 9,
+    "neuvieme": 7
   }
 }

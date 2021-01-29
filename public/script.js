@@ -24,6 +24,7 @@ let url;
 // états des boutons
 let saveDes = false;
 let supProj = false;
+let ajuProj = false;
 
 /**
  * ALWAYS update gui from data
@@ -63,6 +64,10 @@ function guiUpdate() {
     let sup = document.getElementById("suppProj");
     sup.innerHTML = "Supprimer ce projet";
     sup.disabled = supProj;
+
+    //ajouProj
+    let aju = document.getElementById("ajouProj");
+    aju.disabled = ajuProj;
   }
 }
 
@@ -77,12 +82,11 @@ function setupGui() {
 
   let option;
   projLen = 0;
+  projAct = projNom+projMin();
   // il n'y a qu'un seul selector
   let dropdown = document.getElementById('designation-dropdown');
   // initialiser
   removeAllChildNodes(dropdown);
-  dropdown.length = 0;
-  dropdown.selectedIndex = 0;
   // remplir selector
   for (const i in data) {
     option = document.createElement('option');
@@ -91,9 +95,7 @@ function setupGui() {
     dropdown.add(option);
     projLen++;
   }
-
-  // fill param key array, il y aura tjs un projet
-  projAct = projMin();
+  dropdown.selected = data[projAct];
   // capter les noms de parametres dans un tableau
   paramA = Object.keys(data[projAct]);
   // supprimer "id" et "name"
@@ -196,12 +198,33 @@ function onMoins(monId) {
   guiUpdate();
 }
 
+// ajouter un projet
+//<button class="btnStyle" id="ajouProj" onclick="ajouteProjet()">Ajouter un projet</button>
+//<input class="textInput" id="nomDeProj" type="text" name="nomDeProj" value="nouvNom"/><br />
+function ajouteProjet() {
+  let nom = document.getElementById("nomDeProj").value;
+  if (nom.length == 0 || nom == "") {
+    alert("Ecrivez un nom unique dans le champ, SVP");
+    return;
+  }
+  // desactiver
+  let aju = document.getElementById("ajouProj");
+  ajuProj = aju.disabled = true;
+  // copie projAct donnees
+  var copie = data[projAct];
+  copie.nom = nom;
+  copie.id = projMax() + 1;
+  projAct = projNom + copie.id;
+  data[projAct] = copie;
+  majReglages('PUT');
+  first = true;
+}
+
 // sauvegarder projet
 function saveReglages() {
   // désactiver bouton
   let sav = document.getElementById("saveRegs");
-  sav.disabled = true;
-  saveDes = true;
+  saveDes = sav.disabled = true;
   majReglages('PUT');
 }
 
@@ -217,6 +240,7 @@ function supprimeProjet() {
   } else {
     // maj var, pour gui
     b.disabled = supProj;
+    // fill param key array, il y aura tjs un projet
     majReglages('DELETE');
     first = true;
   }
@@ -228,19 +252,19 @@ function removeAllChildNodes(parent) {
     parent.removeChild(parent.firstChild);
   }
 }
-function projMin(){
+function projMin() {
   let t;
   for (const i in data) {
-    t = (t<data[i].id) ? t : data[i].id;
+    t = (t < data[i].id) ? t : data[i].id;
   }
-  return "projet"+t;
+  return t;
 }
-function projMax(){
+function projMax() {
   let t;
   for (const i in data) {
-    t = (t>data[i].id) ? t : data[i].id;
+    t = (t > data[i].id) ? t : data[i].id;
   }
-  return "projet"+t;
+  return t;
 }
 var randomProperty = function (obj) {
   var keys = Object.keys(obj);
@@ -276,15 +300,12 @@ function majReglages(crud) {
       switch (crud) {
         case "PUT":
           saveDes = false;
+          ajuProj = false;
         case "DELETE":
           supProj = false;
       }
 
-    } else {
-      // Reached the server, but it returned an error
     }
-    // toujours
-    guiUpdate();
   }
   xhr.onerror = function () {
     console.error('An error occurred fetching the JSON from ' + url);
