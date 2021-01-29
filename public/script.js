@@ -4,12 +4,17 @@
  */
 // json entier (données = data)
 let data;
-// au début on fabrique selector, ce vars rassure qu'il n'ai fabriqué qu'une fois et après, first = false
-let first = true;
+/**
+ * 0 = nouveau
+ * 1 = ré, initialisé
+ * 2 = projet ajouté
+ * 3 = projet supprimé
+ * 
+ */
+let majType = 0;
 
 // indice actuel, 0 corréspond à D1_Eco 50, 1 corréspond à D2_Janisol
 let projAct;
-let projLen = 0;
 let projNom = "projet";
 
 // les noms des params de chaque json
@@ -22,9 +27,8 @@ let sliderA = [];
 let url;
 
 // états des boutons
-let saveDes = false;
-let supProj = false;
-let ajuProj = false;
+let supBtnDesactive = false;
+let ajuBtnDesactive = false;
 
 /**
  * ALWAYS update gui from data
@@ -59,15 +63,15 @@ function guiUpdate() {
 
     // boutons
     let sav = document.getElementById("saveRegs");
-    sav.disabled = saveDes;
+    sav.disabled = false;
 
     let sup = document.getElementById("suppProj");
     sup.innerHTML = "Supprimer ce projet";
-    sup.disabled = supProj;
+    sup.disabled = supBtnDesactive;
 
     //ajouProj
     let aju = document.getElementById("ajouProj");
-    aju.disabled = ajuProj;
+    aju.disabled = ajuBtnDesactive;
   }
 }
 
@@ -77,46 +81,71 @@ function guiUpdate() {
  * https://www.codebyamir.com/blog/populate-a-select-dropdown-list-with-json
  */
 function setupGui() {
-  // fabrique une fois seulement
-  if (!first) return;
 
+  // chaque fois
   let option;
-  projLen = 0;
-  projAct = projNom+projMin();
   // il n'y a qu'un seul selector
   let dropdown = document.getElementById('designation-dropdown');
-  // initialiser
-  removeAllChildNodes(dropdown);
-  // remplir selector
-  for (const i in data) {
-    option = document.createElement('option');
-    option.text = data[i].nom;
-    option.value = projNom + data[i].id;
-    dropdown.add(option);
-    projLen++;
-  }
-  dropdown.selected = data[projAct];
-  // capter les noms de parametres dans un tableau
-  paramA = Object.keys(data[projAct]);
-  // supprimer "id" et "name"
-  paramA.splice(0, 2);
-  // capter pour boucler maj gui
-  len = paramA.length;
 
-  // remplir global var pour gérer le gui
-  for (let i = 0; i < len; i++) {
-    let s = document.getElementById(paramA[i]);
-    let obj = {
-      step: s.step,
-      min: s.min,
-      max: s.max
-    };
-    // step, min, max de chaque slider
-    sliderA.push(obj);
-  }
+  // fabrique une fois seulement
+  switch (majType) {
 
-  // une fois seulement (on appel le json à chaque appuis sur selector)
-  first = false;
+    // nouveau
+    case 0:
+      projAct = projNom + projMin();
+      // capter les noms de parametres dans un tableau
+      paramA = Object.keys(data[projAct]);
+      // supprimer "id" et "name"
+      paramA.splice(0, 2);
+      // capter pour boucler maj gui
+      len = paramA.length;
+      // remplir global var pour gérer le gui
+      for (let i = 0; i < len; i++) {
+        let s = document.getElementById(paramA[i]);
+        let obj = {
+          step: s.step,
+          min: s.min,
+          max: s.max
+        };
+        // step, min, max de chaque slider
+        sliderA.push(obj);
+      }
+      for (const i in data) {
+        option = document.createElement('option');
+        option.text = data[i].nom;
+        option.value = projNom + data[i].id;
+        dropdown.add(option);
+      }
+      break;
+
+    // re-initialiser
+    case 1:
+      return;
+
+    // ajouter projet
+    case 2:
+      ajuBtnDesactive = false;
+      option = document.createElement('option');
+      option.text = data[projAct].nom;
+      option.value = projAct;
+      dropdown.add(option);
+      dropdown.selectedIndex = dropdown.length-1;
+      break;
+
+    // supprimer projet
+    case 3:
+      supBtnDesactive = false;
+      projAct = projNom + projMin();
+      // remplir selector
+      removeAllChildNodes(dropdown);
+      for (const i in data) {
+        option = document.createElement('option');
+        option.text = data[i].nom;
+        option.value = projNom + data[i].id;
+        dropdown.add(option);
+      }
+  }
+  majType = 1;
 }
 
 /**
@@ -202,29 +231,38 @@ function onMoins(monId) {
 //<button class="btnStyle" id="ajouProj" onclick="ajouteProjet()">Ajouter un projet</button>
 //<input class="textInput" id="nomDeProj" type="text" name="nomDeProj" value="nouvNom"/><br />
 function ajouteProjet() {
+
+  // validation
   let nom = document.getElementById("nomDeProj").value;
-  if (nom.length == 0 || nom == "") {
+  if (nom.length == 0 || nom == "" || nom == "nouveau nom") {
     alert("Ecrivez un nom unique dans le champ, SVP");
     return;
   }
+  // existe deja ?
+  for (const i in data) {
+    if (nom == data[i].nom) {
+      alert("Nom existe. Ecrivez un nom unique dans le champ, SVP");
+      return;
+    }
+  }
   // desactiver
   let aju = document.getElementById("ajouProj");
-  ajuProj = aju.disabled = true;
+  ajuBtnDesactive = aju.disabled = true;
   // copie projAct donnees
   var copie = data[projAct];
   copie.nom = nom;
   copie.id = projMax() + 1;
   projAct = projNom + copie.id;
   data[projAct] = copie;
+  majType = 2;
   majReglages('PUT');
-  first = true;
 }
 
 // sauvegarder projet
 function saveReglages() {
   // désactiver bouton
   let sav = document.getElementById("saveRegs");
-  saveDes = sav.disabled = true;
+  sav.disabled = true;
   majReglages('PUT');
 }
 
@@ -233,16 +271,16 @@ function saveReglages() {
 function supprimeProjet() {
   let b = document.getElementById("suppProj");
   // confirmer
-  if (!supProj) {
+  if (!supBtnDesactive) {
     b.innerHTML = "Supprimer, oui ?";
-    supProj = true;
+    supBtnDesactive = true;
     return;
   } else {
     // maj var, pour gui
-    b.disabled = supProj;
+    b.disabled = supBtnDesactive;
     // fill param key array, il y aura tjs un projet
     majReglages('DELETE');
-    first = true;
+    majType = 3;
   }
 }
 
@@ -266,10 +304,6 @@ function projMax() {
   }
   return t;
 }
-var randomProperty = function (obj) {
-  var keys = Object.keys(obj);
-  return obj[keys[keys.length * Math.random() << 0]];
-};
 /**
  * 
  * m-a-j json dans le server
@@ -295,16 +329,6 @@ function majReglages(crud) {
       url = 'http://localhost:3001/projets';
       request.open('GET', url, true);
       request.send();
-
-      // activer btn
-      switch (crud) {
-        case "PUT":
-          saveDes = false;
-          ajuProj = false;
-        case "DELETE":
-          supProj = false;
-      }
-
     }
   }
   xhr.onerror = function () {
